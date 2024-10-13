@@ -1,5 +1,8 @@
+from typing import Generator
+
 import numpy as np
 import mmh3
+
 
 class BloomFilterNHash:
     def __init__(
@@ -28,17 +31,18 @@ class BloomFilterNHash:
         tagret_bit = np.bitwise_and(self.is_hashed[cell_idx], logic_bit)
         return tagret_bit > 0
 
-    def hash(self, string: str, hash_idx: int) -> list:
-        return mmh3.hash(string, seed=hash_idx) % self.filter_size
+    def hash(self, string: str) -> Generator:
+        for bf_seed in range(0, self.hash_num):
+            yield mmh3.hash(string, seed=bf_seed) % self.filter_size
 
     def put(self, string: str):
-        for hash_idx in range(self.hash_num):
-            string_hash = self.hash(string, hash_idx=hash_idx)
+        string_hashes = self.hash(string)
+        for string_hash in string_hashes:
             self._insert_bit(string_hash)
 
     def get(self, string: str) -> bool:
-        for hash_idx in range(self.hash_num):
-            string_hash = self.hash(string, hash_idx=hash_idx)
+        string_hashes = self.hash(string)
+        for string_hash in string_hashes:
             if not self._get_bit(string_hash):
                 return False
         return True

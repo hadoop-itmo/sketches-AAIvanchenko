@@ -1,10 +1,29 @@
 import random
-from tqdm import tqdm
 import uuid
+
+from tqdm import tqdm
 
 from counter_bloom_filter import ConutersBloomFilter
 
+
 def gen_grouped_seq(name, pattern, *, n_extra_cols=0, to_shuffle=False):
+    """
+    Порождает файл с заданным шаблоном распределением повторяемости ключей в первом поле
+
+    Шаблон - список пар положительных целых
+
+    Первое число - сколько групп записей с заданной численностью хочется  породить
+    Второй число - численность
+
+    Проще объяснить на примерах:
+
+    [(1, 1)] - хотим породить одну запись
+    [('key_1', 1)] - хотим породить одну запись с ключем 'key_1'
+    [(1, 100)] - хотим породить 100 записей с одним ключом
+    [(100, 1)] - хотим породить 100 записей с разными ключами (100 групп записей численностью 1 каждая) 
+    [(15, 10)] - хотим породить 10 записей с одним ключом, 10 другим - и так 15 раз
+    [(1000, 1), (2, 400)] - хотим породить 1000 записей с уникальными ключами, 400 записей с другим и еще 400 с каким-то еще
+    """
     def gen():
         num = 0
         for keys, n_records in pattern:
@@ -35,11 +54,14 @@ def gen_grouped_seq(name, pattern, *, n_extra_cols=0, to_shuffle=False):
         for v in tqdm(result, total=total):
             print(v, file=f)
 
+
 def read_csv_keys(csv_name):
+    """ Считаем первую колонку из csv файла"""
     with open(csv_name, 'rt') as f:
         for line in f:
             key = line.rstrip().split(',')[0]
             yield key
+
 
 def count_keys(keys_iter, counter_bf: ConutersBloomFilter,
                sup_counter_bf: ConutersBloomFilter = None,
@@ -61,6 +83,7 @@ def count_keys(keys_iter, counter_bf: ConutersBloomFilter,
                     print('Add new key:', key)
     
     return thres_keys
+
 
 if __name__ == '__main__':
     target_table_row_num = 10**6

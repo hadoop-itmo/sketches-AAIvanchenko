@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+from tqdm.auto import tqdm
+
 from counter_bloom_filter import ConutersBloomFilter
 
 
@@ -35,6 +37,7 @@ def count_join_size(
     keys_enable = True
     table_1_key_iter = iter(table_1_keys)
     table_2_key_iter = iter(table_2_keys)
+    p_bar = tqdm(desc='Process 1 and 2 file')
     while keys_enable:
         keys_enable = False
 
@@ -59,6 +62,8 @@ def count_join_size(
         if table_1_count_dict is not None and any(len(c_dict) > unique_key_thres for c_dict in [table_1_count_dict, table_2_count_dict]):
             table_1_count_dict = None
             table_2_count_dict = None
+        
+        p_bar.update(1)
 
     join_row_counts = 0
     # Если точная реализация
@@ -74,8 +79,8 @@ def count_join_size(
     else:
         print('Use non-accurate algorythm')
         # Заново пройдёмся по всем ключам из одного из файла
-        # old_key = ''
-        for key in saved_1_table_keys:
+        saved_1_table_key_iter = tqdm(saved_1_table_keys, desc='Counting JSON rows by non-accurate algorythm')
+        for key in saved_1_table_key_iter:
             # Получим значение встречаемости во втором файле
             # как среднее значение счётчиков и поделим на количество хешей -> Примерное кол-во одинаковых комбинаций
             counter_idxes = table_2_counter_bf.hash(key)

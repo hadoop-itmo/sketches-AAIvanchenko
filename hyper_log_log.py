@@ -1,6 +1,7 @@
 import numpy as np
 import mmh3
 
+
 class HyperLogLog:
     def __init__(self, b: int):
         self.b = b
