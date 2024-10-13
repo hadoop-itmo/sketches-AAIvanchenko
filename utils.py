@@ -1,5 +1,6 @@
 import uuid
 import random
+from tqdm import tqdm
 
 
 def gen_uniq_seq(name, n_records, n_extra_cols=0):
@@ -65,7 +66,7 @@ def gen_grouped_seq(name, pattern, *, n_extra_cols=0, to_shuffle=False):
         result = gen()
 
     with open(name, "wt") as f:
-        for v in result:
+        for v in tqdm(result):
             print(v, file=f)
 
 
