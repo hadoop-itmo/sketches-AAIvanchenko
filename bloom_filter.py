@@ -1,3 +1,6 @@
+import numpy as np
+import mmh3
+
 class BloomFilter:
     def __init__(self, filter_size: int):
         self.filter_size = filter_size
